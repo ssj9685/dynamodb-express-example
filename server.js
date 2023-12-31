@@ -1,4 +1,5 @@
 import express from "express";
+import serverless from "serverless-http";
 import cors from "cors";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
@@ -54,10 +55,7 @@ app.get("/todos", async (_, res) => {
 });
 
 app.post("/todos", async (req, res) => {
-  const { title, completed } = req.body as {
-    title: string;
-    completed: boolean;
-  };
+  const { title, completed } = req.body;
 
   const item = { todoId: randomUUID(), title, completed };
 
@@ -86,9 +84,9 @@ app.get("/todos/:todoId", async (req, res) => {
   });
 
   try {
-    const todos = await docClient.send(command);
+    const todo = await docClient.send(command);
 
-    res.json(todos);
+    res.json(todo);
   } catch (e) {
     console.error(e);
   }
@@ -97,3 +95,12 @@ app.get("/todos/:todoId", async (req, res) => {
 app.listen(port, () => {
   console.log(`port: ${port}`);
 });
+
+export const handler = serverless(app);
+
+export default {
+  handler: (event, context) => {
+    const response = handler(event, context);
+    return response;
+  },
+};

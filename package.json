@@ -1,16 +1,17 @@
 {
   "scripts": {
-    "dev": "nodemon server.ts"
+    "dev": "nodemon server.js",
+    "zip": "zip -r todo-server.zip .",
+    "upload": "aws lambda update-function-code --function-name todo-server --zip-file fileb://todo-server.zip > /dev/null && echo 'Completed!'",
+    "deploy": "npm run zip && npm run upload"
   },
+  "type": "module",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.478.0",
     "@aws-sdk/lib-dynamodb": "^3.478.0",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.10.5",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "ts-node": "^10.9.2"
+    "serverless-http": "^3.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
