@@ -1,9 +1,14 @@
 {
+  "name": "todo-server",
+  "main": "./index.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon index.js",
     "zip": "zip -r todo-server.zip .",
-    "upload": "aws lambda update-function-code --function-name todo-server --zip-file fileb://todo-server.zip > /dev/null && echo 'Completed!'",
+    "upload": "aws lambda update-function-code --function-name todo-server --zip-file fileb://todo-server.zip > /dev/null && echo 'Completed!' && rm todo-server.zip",
     "deploy": "npm run zip && npm run upload"
+  },
+  "exports": {
+    "./util/query-builder": "./util/query-builder/index.js"
   },
   "type": "module",
   "dependencies": {
