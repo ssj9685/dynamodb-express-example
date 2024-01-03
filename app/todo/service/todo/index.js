@@ -1,24 +1,61 @@
 //@ts-check
 import { DynamoDbClientHelper } from "../../../../util/db-helper/index.js";
 import { DynamoDBQueryBuilder } from "../../../../util/query-builder/index.js";
-import todo from "../../entity/todo/index.js";
+import TodoEntity from "../../entity/todo/index.js";
 import { BaseService } from "../base/index.js";
 
 export class TodoService extends BaseService {
-  static async getItems() {
-    const helper = DynamoDbClientHelper.instance;
-
+  static async findAll() {
     const queryBuilder = new DynamoDBQueryBuilder();
 
-    queryBuilder.select().from("todos");
-
     try {
-      const todos = await helper.executeStatement(queryBuilder);
+      const todos = await DynamoDbClientHelper.executeStatement(
+        queryBuilder.select().from("todos")
+      );
 
       return {
         statusCode: todos.$metadata.httpStatusCode ?? 500,
         totalCount: todos.Items?.length,
-        items: todos.Items?.map((item) => super.convertAttr(todo, item)),
+        items: todos.Items?.map((item) => super.convertAttr(TodoEntity, item)),
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /**
+   * @param {{todoId: string; title: string; completed: boolean}} param
+   * @returns {Promise<{statusCode: number}>}
+   */
+  static async create(param) {
+    const queryBuilder = new DynamoDBQueryBuilder();
+
+    try {
+      const todos = await DynamoDbClientHelper.executeStatement(
+        queryBuilder.insert("todos", param)
+      );
+
+      return {
+        statusCode: todos.$metadata.httpStatusCode ?? 500,
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /** @param {string} todoId */
+  static async findById(todoId) {
+    const queryBuilder = new DynamoDBQueryBuilder();
+
+    try {
+      const todos = await DynamoDbClientHelper.executeStatement(
+        queryBuilder.select().from("todos").where(`todoId='${todoId}'`)
+      );
+
+      return {
+        statusCode: todos.$metadata.httpStatusCode ?? 500,
+        totalCount: todos.Items?.length,
+        items: todos.Items?.map((item) => super.convertAttr(TodoEntity, item)),
       };
     } catch (error) {
       console.error(error);

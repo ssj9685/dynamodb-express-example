@@ -33,12 +33,12 @@ export class BaseQueryBuilder {
 
   /**
    * WHERE 절 추가
-   * @param {string} conditionExpression 조건 표현식
+   * @template {T}
+   * @param {string} condition 조건 표현식
    * @returns {BaseQueryBuilder} 자기 자신의 인스턴스
    */
-  where(condition, parameters) {
-    this.parameters = { ...(this.parameters ?? []), ...parameters };
-    return this._addClause(` WHERE ${condition}`);
+  where(condition) {
+    return this._addClause(`WHERE ${condition}`);
   }
 
   /**
@@ -48,6 +48,28 @@ export class BaseQueryBuilder {
    */
   limit(limit) {
     this.limitValue = limit;
+    return this;
+  }
+
+  /**
+   * INSERT 절 추가
+   * @param {object} item 추가할 아이템
+   * @returns {BaseQueryBuilder} 자기 자신의 인스턴스
+   */
+  insert(tableName, item) {
+    this._addClause(`INSERT INTO ${tableName} VALUE ${JSON.stringify(item)}`);
+    return this;
+  }
+
+  /**
+   * UPDATE 절 추가
+   * @template {T}
+   * @param {`${T}=?`} condition 조건 표현식
+   * @param {object} expression 업데이트 표현식
+   * @returns {BaseQueryBuilder} 자기 자신의 인스턴스
+   */
+  update(tableName, expression) {
+    this._addClause(`UPDATE ${tableName} SET ${expression}`);
     return this;
   }
 
@@ -63,6 +85,9 @@ export class BaseQueryBuilder {
     } else {
       this.query += ` ${clause}`;
     }
+
+    this.query.replace(/"/g, "'");
+
     return this;
   }
 
@@ -71,6 +96,11 @@ export class BaseQueryBuilder {
    * @returns {string} 쿼리 문자열
    */
   build() {
+    if (this.limitValue) {
+      const limitExpression = `LIMIT ${this.limitValue}`;
+      this.query += ` ${limitExpression}`;
+    }
+
     return this.query;
   }
 }

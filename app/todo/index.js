@@ -2,14 +2,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import express from "express";
 import cors from "cors";
-import {
-  DynamoDBDocumentClient,
-  GetCommand,
-  PutCommand,
-} from "@aws-sdk/lib-dynamodb";
-import { randomUUID } from "crypto";
-import { TodoService } from "./service/index.js";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { DynamoDbClientHelper } from "../../util/db-helper/index.js";
+import todoController from "./controller/index.js";
 
 export function initTodoApp() {
   const { DYNAMODB_ACCESS_KEY, DYNAMODB_SECRET_ACCESS_KEY, DYNAMODB_REGION } =
@@ -36,56 +31,7 @@ export function initTodoApp() {
   app.use(cors());
   const port = 8081;
 
-  app.get("/todos", async (_, res) => {
-    const todos = await TodoService.getItems();
-
-    const { statusCode, totalCount, items } = todos;
-
-    res.status(statusCode);
-
-    res.json({
-      totalCount,
-      items,
-    });
-  });
-
-  app.post("/todos", async (req, res) => {
-    const { title, completed } = req.body;
-
-    const item = { todoId: randomUUID(), title, completed };
-
-    const command = new PutCommand({
-      TableName: "todos",
-      Item: item,
-    });
-    try {
-      const todos = await docClient.send(command);
-
-      res.status(todos.$metadata.httpStatusCode ?? 500);
-
-      res.json(item);
-    } catch (e) {
-      console.error(e);
-    }
-  });
-
-  app.get("/todos/:todoId", async (req, res) => {
-    const { todoId } = req.params;
-    const command = new GetCommand({
-      Key: {
-        todoId,
-      },
-      TableName: "todos",
-    });
-
-    try {
-      const todo = await docClient.send(command);
-
-      res.json(todo);
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  app.use("/todos", todoController);
 
   app.listen(port, () => {
     console.log(`port: ${port}`);

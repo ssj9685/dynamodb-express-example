@@ -13,8 +13,10 @@ import { DynamoDBQueryBuilder } from "../query-builder/index.js";
  * @property {DynamoDbClientHelper} instance DynamoDbClientHelper 클래스의 단일 인스턴스
  */
 export class DynamoDbClientHelper {
-  /**@type {DynamoDbClientHelper} */
+  /** @type {DynamoDbClientHelper} */
   static instance;
+  /** @type {DynamoDBClient} */
+  static client;
 
   /**
    * DynamoDbClientHelper 클래스의 생성자입니다.
@@ -23,6 +25,7 @@ export class DynamoDbClientHelper {
   constructor(client) {
     if (!DynamoDbClientHelper.instance) {
       DynamoDbClientHelper.instance = this;
+      DynamoDbClientHelper.client = client;
       this.client = client;
     }
 
@@ -35,7 +38,7 @@ export class DynamoDbClientHelper {
    * @returns {Promise<DynamoDBExecuteStatementOutput>} 쿼리 실행 결과
    * @throws {Error} 쿼리 실행 중 발생한 오류
    */
-  async executeStatement(queryBuilder) {
+  static async executeStatement(queryBuilder) {
     if (!this.client) {
       throw new Error("client cannot be undefined");
     }
@@ -54,7 +57,7 @@ export class DynamoDbClientHelper {
       return response;
     } catch (error) {
       throw new Error(
-        `Error executing statement: ${error} '${query}' '${parameters}' ${limitValue}`
+        `Error executing statement: ${error} ${query} ${parameters} ${limitValue}`
       );
     }
   }
