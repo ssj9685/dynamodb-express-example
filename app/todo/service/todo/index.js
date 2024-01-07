@@ -61,4 +61,43 @@ export class TodoService extends BaseService {
       console.error(error);
     }
   }
+
+  /**
+   * @param {string} todoId
+   * @param {boolean} completed
+   */
+  static async update(todoId, completed) {
+    const queryBuilder = new DynamoDBQueryBuilder();
+
+    queryBuilder
+      .update("todos", `completed=${completed}`)
+      .where(`todoId='${todoId}'`);
+
+    try {
+      const result = await DynamoDbClientHelper.executeStatement(queryBuilder);
+
+      return {
+        statusCode: result.$metadata.httpStatusCode ?? 500,
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /** @param {string} todoId */
+  static async delete(todoId) {
+    const queryBuilder = new DynamoDBQueryBuilder();
+
+    queryBuilder.delete().from("todos").where(`todoId='${todoId}'`);
+
+    try {
+      const result = await DynamoDbClientHelper.executeStatement(queryBuilder);
+
+      return {
+        statusCode: result.$metadata.httpStatusCode ?? 500,
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }

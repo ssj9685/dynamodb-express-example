@@ -64,12 +64,16 @@ export class BaseQueryBuilder {
   /**
    * UPDATE 절 추가
    * @template {T}
-   * @param {`${T}=?`} condition 조건 표현식
    * @param {object} expression 업데이트 표현식
    * @returns {BaseQueryBuilder} 자기 자신의 인스턴스
    */
   update(tableName, expression) {
     this._addClause(`UPDATE ${tableName} SET ${expression}`);
+    return this;
+  }
+
+  delete() {
+    this._addClause(`DELETE`);
     return this;
   }
 
@@ -86,7 +90,7 @@ export class BaseQueryBuilder {
       this.query += ` ${clause}`;
     }
 
-    this.query.replace(/"/g, "'");
+    this.query = this.query.replace(/"/g, "'");
 
     return this;
   }

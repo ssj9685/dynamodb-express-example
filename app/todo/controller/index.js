@@ -44,4 +44,25 @@ todoController.get("/:todoId", async (req, res) => {
   });
 });
 
+todoController.patch("/:todoId", async (req, res) => {
+  const { todoId } = req.params;
+  const { completed } = req.body;
+
+  const result = await TodoService.update(todoId, completed);
+
+  const { statusCode } = result;
+
+  res.sendStatus(statusCode);
+});
+
+todoController.delete("/:todoId", async (req, res) => {
+  const { todoId } = req.params;
+
+  const result = await TodoService.delete(todoId);
+
+  const { statusCode } = result;
+
+  res.sendStatus(statusCode);
+});
+
 export default todoController;
